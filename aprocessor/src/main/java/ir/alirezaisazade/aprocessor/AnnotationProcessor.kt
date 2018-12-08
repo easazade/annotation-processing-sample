@@ -3,6 +3,7 @@ package ir.alirezaisazade.aprocessor
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.*
 import ir.alirezaisazade.annotations.Encapsulate
+import ir.alirezaisazade.annotations.Screen
 import java.io.File
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -20,35 +21,49 @@ class AnnotationProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
-        return mutableSetOf(Encapsulate::class.java.name)
+        return mutableSetOf(Encapsulate::class.java.name, Screen::class.java.name)
     }
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latest()
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         roundEnv.getElementsAnnotatedWith(Encapsulate::class.java)
-            .forEach {
-                if (it.kind != ElementKind.CLASS) {
-                    processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, "Only classes can be annotated")
+            .forEach { element ->
+                if (element.kind != ElementKind.CLASS) {
+                    processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, "Only classes can be annotated with @Encapsulate")
                     return true
                 }
-                processAnnotation(it)
+                processAnnotationEncapsulate(element)
+            }
+        roundEnv.getElementsAnnotatedWith(Screen::class.java)
+            .forEach { element ->
+                if (element.kind != ElementKind.CLASS) {
+                    processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, "Only classes can be annotated with @Screen")
+                    return true
+                }
+                processAnnotationScreen(element)
             }
         return false
     }
 
-    private fun processAnnotation(element: Element) {
+
+
+    private fun processAnnotationEncapsulate(element: Element) {
         val className = element.simpleName.toString()
         val pack = processingEnv.elementUtils.getPackageOf(element).toString()
 
         val fileName = "Encapsulated$className"
-        val fileBuilder= FileSpec.builder(pack, fileName)
+        val fileBuilder = FileSpec.builder(pack, fileName)
         val classBuilder = TypeSpec.classBuilder(fileName)
 
         for (enclosed in element.enclosedElements) {
             if (enclosed.kind == ElementKind.FIELD) {
                 classBuilder.addProperty(
-                    PropertySpec.varBuilder(enclosed.simpleName.toString(), enclosed.asType().asTypeName().asNullable(), KModifier.PRIVATE)
+                    PropertySpec.varBuilder(
+                        enclosed.simpleName.toString(),
+                        enclosed.asType().asTypeName().asNullable(),
+                        KModifier.PRIVATE
+                    )
                         .initializer("null")
                         .build()
                 )
@@ -60,7 +75,12 @@ class AnnotationProcessor : AbstractProcessor() {
                 )
                 classBuilder.addFunction(
                     FunSpec.builder("set${enclosed.simpleName}")
-                        .addParameter(ParameterSpec.builder("${enclosed.simpleName}", enclosed.asType().asTypeName().asNullable()).build())
+                        .addParameter(
+                            ParameterSpec.builder(
+                                "${enclosed.simpleName}",
+                                enclosed.asType().asTypeName().asNullable()
+                            ).build()
+                        )
                         .addStatement("this.${enclosed.simpleName} = ${enclosed.simpleName}")
                         .build()
                 )
@@ -70,4 +90,24 @@ class AnnotationProcessor : AbstractProcessor() {
         val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
         file.writeTo(File(kaptKotlinGeneratedDir))
     }
+
+    private fun processAnnotationScreen(element: Element) {
+        val className = element.simpleName.toString()
+        val pack = processingEnv.elementUtils.getPackageOf(element).toString()
+
+        val fileName = "ScreenOf$className"
+        val fileBuilder = FileSpec.builder(pack, fileName)
+        val classBuilder = TypeSpec.classBuilder(fileName)
+
+        for (enclosed in element.enclosedElements){
+            if (enclosed.kind == ElementKind.METHOD){
+
+            }
+        }
+
+        val file = fileBuilder.addType(classBuilder.build()).build()
+        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
+        file.writeTo(File(kaptKotlinGeneratedDir))
+    }
+
 }
