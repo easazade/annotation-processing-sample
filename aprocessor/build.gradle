@@ -1,16 +1,17 @@
 apply plugin: 'java-library'
-apply plugin: 'kotlin'//TODO  make sure you add this line
-apply plugin: 'kotlin-kapt'//TODO  make sure you add this line
+apply plugin: 'kotlin'//make sure you add this line
+apply plugin: 'kotlin-kapt'//make sure you add this line
 
-sourceCompatibility = 1.8//TODO  make sure version is 8 everywhere
-targetCompatibility = 1.8//TODO  make sure version is 8 everywhere
+sourceCompatibility = 1.8//make sure version is 8 everywhere
+targetCompatibility = 1.8//make sure version is 8 everywhere
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"//TODO  make sure version is 8 everywhere
-    implementation project(':annotations')//TODO  make sure you add this line
-    //tools need to process the annotated elements
-    implementation 'com.squareup:kotlinpoet:0.7.0'//TODO  make sure you add this line
-    implementation "com.google.auto.service:auto-service:1.0-rc4"//TODO  make sure you add this line
-    kapt "com.google.auto.service:auto-service:1.0-rc4"//TODO  make sure you add this line
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    //make sure version is 8 in all modules
+    implementation project(':annotations')//make sure you include annotation
+    //libraries needed to process the annotated elements
+    implementation 'com.squareup:kotlinpoet:0.7.0'//if you are using kotlinpoet
+    implementation "com.google.auto.service:auto-service:1.0-rc4"//make sure you add this line
+    kapt "com.google.auto.service:auto-service:1.0-rc4"//make sure you add this line
 }

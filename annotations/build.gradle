@@ -1,8 +1,8 @@
 apply plugin: 'java-library'
-apply plugin: 'kotlin'//TODO  make sure you add this line
+apply plugin: 'kotlin'//make sure you add kotlin plugin
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"//TODO  make sure version is 8 everywhere
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"//make sure version is 8 everywhere
 }
 
